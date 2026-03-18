@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desarrollos FONATUR | Geoportal Interactivo</title>
+  <meta name="description" content="Geoportal interactivo de los Centros Integralmente Planeados y Marinas Turísticas de FONATUR en México.">
+  <meta property="og:title" content="Geoportal FONATUR">
+  <meta property="og:description" content="Explora la historia de los desarrollos turísticos de FONATUR en México.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar">
+    <header class="header">
+      <div class="header-content">
+        <h1>Desarrollos FONATUR</h1>
+        <p>Centros Integralmente Planeados, PTI y Marinas Turísticas de México</p>
+        <div class="header-stats">
+          <div class="header-stat">
+            <span>📊</span><span id="totalSites">0 desarrollos</span>
+          </div>
+          <div class="header-stat">
+            <span>🗺️</span><span id="legendTotal">0 visibles</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Timeline -->
+    <div class="timeline-control">
+      <label class="timeline-label" for="timelineSlider">Línea de Tiempo</label>
+      <input type="range" class="timeline-slider" id="timelineSlider"
+             min="1970" max="2025" value="2025" step="1"
+             aria-label="Filtrar por año">
+      <div class="timeline-years">
+        <span>1970</span><span>1985</span><span>2000</span><span>2015</span><span>2025</span>
+      </div>
+      <div class="timeline-current">Año: <span id="currentYear">2025</span></div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-chips" role="group" aria-label="Filtrar por tipo">
+      <button class="filter-chip active" data-filter="all">Todos</button>
+      <button class="filter-chip" data-filter="cip">CIP</button>
+      <button class="filter-chip" data-filter="marina">Marinas</button>
+      <button class="filter-chip" data-filter="pti">PTI</button>
+    </div>
+
+    <!-- Leyenda Viva -->
+    <div class="legend-live">
+      <div class="legend-title">Leyenda</div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <span class="legend-dot legend-dot--cip"></span>
+          CIP <span id="legendCipCount" class="legend-count">0</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot legend-dot--marina"></span>
+          Marina <span id="legendMarinaCount" class="legend-count">0</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot legend-dot--pti"></span>
+          PTI <span id="legendPtiCount" class="legend-count">0</span>
+        </div>
+        <div class="legend-item" style="margin-top:8px; border-top:1px solid var(--border); padding-top:12px; width:100%;">
+          <span style="display:inline-block; width:18px; height:4px; background:#3B3B3B; border-bottom: 2px dashed #45BB64; margin-right:4px; vertical-align:middle;"></span>
+          Trazo Tren Maya
+        </div>
+        <div class="legend-item">
+          <img src="img/estaciones/1_Palenque.png" width="16" height="16" style="border-radius:2px; margin-right:4px; display:inline-block; vertical-align:middle; border:1px solid #45BB64;" alt="icono" onerror="this.src='https://placehold.co/16x16/235c4e/45bb64/png?text=TM'"> Estaciones y Paraderos
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+      <div class="search-box">
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="Buscar por nombre o estado..."
+               aria-label="Buscar desarrollos">
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+
+    <!-- Sites list -->
+    <div class="sites-list" id="sitesList" role="list"></div>
+  </aside>
+
+  <!-- ===== MAP ===== -->
+  <main id="map" role="application" aria-label="Mapa interactivo">
+    <!-- Map controls -->
+    <div class="map-controls">
+      <button class="ctrl-btn" id="resetView" aria-label="Vista inicial">🏠 Vista Inicial</button>
+      <button class="ctrl-btn" id="toggleSatBtn" aria-label="Cambiar mapa base">🛰️ Satélite</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>Fuente: FONATUR | Datos de ejemplo</span>
+      <span>© 2026 Geoportal FONATUR</span>
+    </div>
+  </main>
+
+  <!-- Toggle sidebar -->
+  <button class="toggle-sidebar" id="toggleSidebar" aria-label="Mostrar/ocultar panel">
+    <span id="toggleIcon">◀</span>
+  </button>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle"></h2>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-carousel" id="modalCarousel"></div>
+    <div class="carousel-dots" id="modalDots"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<!-- App (ES Module) -->
+<script type="module" src="js/index.js"></script>
+
+</body>
+</html>

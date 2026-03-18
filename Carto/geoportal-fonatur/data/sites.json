@@ -1,0 +1,213 @@
+[
+  {
+    "id": "cancun",
+    "name": "Cancún",
+    "type": "cip",
+    "state": "Quintana Roo",
+    "lat": 21.11234719373184, 
+    "lng": -86.79434953506102,
+    "year": 1974,
+    "description": "Primer CIP de FONATUR. Transformó una isla de pescadores en el principal destino turístico de México.",
+    "details": {
+      "Superficie": "1,200 ha",
+      "Cuartos": "45,000+",
+      "Turistas": "6 millones/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1568402102990-bc541580b59f?w=600&q=75",
+      "https://images.unsplash.com/photo-1512813498716-47110fdbd281?w=600&q=75"
+    ],
+    "polygon": "Cancun.geojson"
+  },
+  {
+    "id": "cozumel",
+    "name": "Cozumel",
+    "type": "marina",
+    "state": "Quintana Roo",
+    "lat": 20.467954893972575,
+    "lng": -86.97850690380487,
+    "year": 2008,
+    "description": "Primer CIP de FONATUR. Transformó una isla de pescadores en el principal destino turístico de México.",
+    "details": {
+      "Superficie": "1,200 ha",
+      "Cuartos": "45,000+",
+      "Turistas": "6 millones/año"
+    },
+    "images": [
+      "https://www.gob.mx/cms/uploads/action_program/main_image/20118/post_Marinas-DJI_0520-Cozumel_2000px.jpg",
+      "https://emeequis.com/wp-content/uploads/2024/01/Marina%20Cozumel:%20un%20negocio%20millonario%20casi%20regalado%20por%20Fonatur%20a%20exdirector%20de%20Mota-Engil.png"
+    ],
+    "polygon": "Cozumel.geojson"
+  },
+  {
+    "id": "ixtapa",
+    "name": "Ixtapa",
+    "type": "cip",
+    "state": "Guerrero",
+    "lat": 17.667803563103273,
+    "lng": -101.6107464976236,
+    "year": 1974,
+    "description": "Desarrollo turístico planificado en la costa del Pacífico mexicano con infraestructura de primer nivel.",
+    "details": {
+      "Superficie": "1,800 ha",
+      "Cuartos": "5,000+",
+      "Turistas": "500,000/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1582610285985-a42d3d8c7041?w=600&q=75"
+    ],
+    "polygon": "Ixtapa.geojson"
+  },
+  {
+    "id": "los-cabos",
+    "name": "Los Cabos",
+    "type": "cip",
+    "state": "Baja California Sur",
+    "lat": 23.044586694654573,
+    "lng": -109.70588874819411,
+    "year": 1976,
+    "description": "Destino de lujo en el extremo sur de Baja California, reconocido internacionalmente por su turismo premium.",
+    "details": {
+      "Superficie": "2,300 ha",
+      "Cuartos": "15,000+",
+      "Turistas": "3 millones/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=75"
+    ],
+    "polygon": null
+  },
+  {
+    "id": "loreto",
+    "name": "Loreto",
+    "type": "cip",
+    "state": "Baja California Sur",
+    "lat": 26.0129,
+    "lng": -111.3486,
+    "year": 1976,
+    "description": "Ecoturismo y turismo cultural junto al Parque Nacional Bahía de Loreto, Patrimonio de la Humanidad.",
+    "details": {
+      "Superficie": "800 ha",
+      "Cuartos": "1,200",
+      "Turistas": "150,000/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=75"
+    ],
+    "polygon": null
+  },
+    {
+    "id": "nopoló",
+    "name": "Nopoló",
+    "type": "cip",
+    "state": "Baja California Sur",
+    "lat": 25.938753355434663,
+    "lng": -111.36714862038814,
+    "year": 1976,
+    "description": "Un sitio para descansar y relajarse.",
+    "details": {
+      "Superficie": "800 ha",
+      "Cuartos": "1,200",
+      "Turistas": "150,000/año"
+    },
+    "images": [
+      "https://i0.wp.com/foodandpleasure.com/wp-content/uploads/2024/06/nopolo-pueblo-de-loreto2.jpg?w=1080&ssl=1"
+    ],
+    "polygon": null
+  },
+    {
+    "id": "puerto_escondido",
+    "name": "Puerto Escondido",
+    "type": "cip",
+    "state": "Baja California Sur",
+    "lat": 25.813782385794912,
+    "lng": -111.31210519827988,
+    "year": 1976,
+    "description": "Un sitio para descansar y relajarse.",
+    "details": {
+      "Superficie": "800 ha",
+      "Cuartos": "1,200",
+      "Turistas": "150,000/año"
+    },
+    "images": [
+      "https://misionloreto.com/wp-content/uploads/2011/03/boats.jpg"
+    ],
+    "polygon": null
+  },
+  {
+    "id": "huatulco",
+    "name": "Huatulco",
+    "type": "cip",
+    "state": "Oaxaca",
+    "lat": 15.7653,
+    "lng": -96.1292,
+    "year": 1984,
+    "description": "9 bahías y 36 playas; certificado como comunidad sustentable por EarthCheck.",
+    "details": {
+      "Superficie": "21,000 ha",
+      "Cuartos": "5,500",
+      "Turistas": "800,000/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=75"
+    ],
+    "polygon": null
+  },
+  {
+    "id": "acapulco-coyuca",
+    "name": "Acapulco-Coyuca",
+    "type": "cip",
+    "state": "Guerrero",
+    "lat": 16.849743538022256,
+    "lng": -99.90250088597479,
+    "year": 2025,
+    "description": "Nuevo CIP de FONATUR en Acapulco-Coyuca.",
+    "details": {
+      "Superficie": "3,200 ha",
+      "Cuartos": "8,000+",
+      "Turistas": "1.5 millones/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=75"
+    ],
+    "polygon": null
+  },
+  {
+    "id": "litibu",
+    "name": "PTI Litibú",
+    "type": "pti",
+    "state": "Nayarit",
+    "lat": 20.796149870392977,
+    "lng": -105.48425060741916,
+    "year": 2012,
+    "description": "Proyecto de desarrollo turístico integral orientado al turismo ecológico y de naturaleza.",
+    "details": {
+      "Superficie": "1,100 ha (EJEMPLO)",
+      "Cuartos": "Proyectados 3,000+",
+      "Turistas": "Meta 500,000/año"
+    },
+    "images": [
+      "https://cbcmexico.mx/uploads/200176/659-litibu.jpg"
+    ],
+    "polygon": null
+  },
+  {
+    "id": "marina-los-cabos",
+    "name": "Marina Los Cabos",
+    "type": "marina",
+    "state": "Baja California Sur",
+    "lat": 22.885,
+    "lng": -109.91,
+    "year": 1985,
+    "description": "Marina de clase mundial para yates y embarcaciones de lujo con servicios premium.",
+    "details": {
+      "Superficie": "12 ha",
+      "Posiciones": "380",
+      "Turistas": "300,000/año"
+    },
+    "images": [
+      "https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=600&q=75"
+    ],
+    "polygon": null
+  }
+]
