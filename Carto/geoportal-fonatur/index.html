@@ -45,12 +45,12 @@
     <div class="timeline-control">
       <label class="timeline-label" for="timelineSlider">Línea de Tiempo</label>
       <input type="range" class="timeline-slider" id="timelineSlider"
-             min="1970" max="2025" value="2025" step="1"
+             min="1970" max="2026" value="2026" step="1"
              aria-label="Filtrar por año">
       <div class="timeline-years">
-        <span>1970</span><span>1985</span><span>2000</span><span>2015</span><span>2025</span>
+        <span>1970</span><span>1985</span><span>2000</span><span>2015</span><span>2026</span>
       </div>
-      <div class="timeline-current">Año: <span id="currentYear">2025</span></div>
+      <div class="timeline-current">Año: <span id="currentYear">2026</span></div>
     </div>
 
     <!-- Filter chips -->
@@ -59,6 +59,7 @@
       <button class="filter-chip" data-filter="cip">CIP</button>
       <button class="filter-chip" data-filter="marina">Marinas</button>
       <button class="filter-chip" data-filter="pti">PTI</button>
+      <button class="filter-chip" data-filter="dtc">DTC</button>
     </div>
 
     <!-- Leyenda Viva -->
@@ -76,6 +77,18 @@
         <div class="legend-item">
           <span class="legend-dot legend-dot--pti"></span>
           PTI <span id="legendPtiCount" class="legend-count">0</span>
+        </div>
+        <div class="legend-item" style="margin-top:8px; border-top:1px solid var(--border); padding-top:12px; width:100%;">
+          <span style="display:inline-block; width:12px; height:12px; background:#e07a5f; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
+          Pueblos Mancomunados
+        </div>
+        <div class="legend-item">
+          <span style="display:inline-block; width:12px; height:12px; background:#81b29a; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
+          Camino del Mayab
+        </div>
+        <div class="legend-item">
+          <span style="display:inline-block; width:12px; height:12px; background:#f2cc8f; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
+          Maya Kahan
         </div>
         <div class="legend-item" style="margin-top:8px; border-top:1px solid var(--border); padding-top:12px; width:100%;">
           <span style="display:inline-block; width:18px; height:4px; background:#3B3B3B; border-bottom: 2px dashed #45BB64; margin-right:4px; vertical-align:middle;"></span>

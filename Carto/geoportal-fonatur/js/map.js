@@ -11,6 +11,7 @@ let markersLayer = null;
 let polygonsLayer = null;
 let trenMayaLineLayer = null;
 let trenMayaStationsLayer = null;
+let dtcLayerGroup = null;
 let baseLayerLight = null;
 let baseLayerSat = null;
 let currentBasemap = 'light';
@@ -63,6 +64,7 @@ export function initMap() {
   markersLayer = L.layerGroup().addTo(map);
   polygonsLayer = L.layerGroup().addTo(map);
   trenMayaLineLayer = L.layerGroup().addTo(map);
+  dtcLayerGroup = L.layerGroup().addTo(map);
   
   trenMayaStationsLayer = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -121,7 +123,31 @@ function buildIcon(type, selected, hovered) {
   });
 }
 
+// Mapa de siteId → imagen principal para popup tipo galería
+const GALLERY_COVER = {
+  'cozumel':        'img/Cozumel/1CO.webp',
+  'acapulco-coyuca':'img/Aca/ACA 1 Introduccion.webp',
+  'los-cabos':      'img/Cabos/CA1.webp',
+  'marina-los-cabos':'img/Cabos/CA1.webp',
+  'cancun':         'img/Cancun/C1.webp',
+  'huatulco':       'img/Huatulco/Huatulco 1.webp',
+  'ixtapa':         'img/Ixtapa/Ixtapa 1.webp',
+  'litibu':         'img/Lit/Lit_1.webp',
+  'loreto':         'img/Lor_Nop/Lor_Nop1.webp',
+  'nopoló':         'img/Lor_Nop/Lor_Nop1.webp',
+  'puerto_escondido':'img/Lor_Nop/Lor_Nop1.webp'
+};
+
 function popupHTML(site) {
+  // --- Sitios con galería local: popup = imagen con botón superpuesto ---
+  if (GALLERY_COVER[site.id]) {
+    return `<div class="gallery-popup">
+      <img src="${encodeURI(GALLERY_COVER[site.id])}" alt="${site.name}" class="gallery-popup-img">
+      <button class="view-more-btn gallery-popup-btn" data-id="${site.id}">Ver detalles</button>
+    </div>`;
+  }
+
+  // --- Popup genérico ---
   const tag = site.type === 'cip' ? 'CIP' : site.type === 'marina' ? 'Marina' : site.type === 'pti' ? 'PTI' : '';
   const bg = COLORS[site.type]?.bg || '#235C4E';
   const icon = COLORS[site.type]?.icon || '📍';
@@ -164,21 +190,26 @@ export function renderMarkers(sites, state) {
     const hov = state.hoveredSiteId === site.id;
     const icon = buildIcon(site.type, sel, hov);
 
+    const isGallery = !!GALLERY_COVER[site.id];
+    const popupOpts = isGallery
+      ? { maxWidth: 500, minWidth: 360, className: 'fonatur-station-popup gallery-station-popup' }
+      : { maxWidth: 300, minWidth: 260, className: 'fonatur-station-popup' };
+
     const marker = L.marker([site.lat, site.lng], { icon })
-      .bindPopup(popupHTML(site), { maxWidth: 300, minWidth: 260, className: 'fonatur-station-popup' });
+      .bindPopup(popupHTML(site), popupOpts);
 
     marker.on('click', () => _onClickCb?.(site));
     marker.on('mouseover', () => _onHoverCb?.(site.id));
     marker.on('mouseout', () => _onHoverEndCb?.());
     
-    // Bind button inside popup
+    // Bind button inside popup (once: true evita acumulación si el popup se abre varias veces)
     marker.on('popupopen', (e) => {
-      const btn = e.popup.getElement().querySelector('.spc-action-btn');
+      const btn = e.popup.getElement().querySelector('.spc-action-btn, .gallery-popup-btn');
       if (btn) {
         btn.addEventListener('click', (ev) => {
           ev.stopPropagation();
           _onDetailsClickCb?.(site);
-        });
+        }, { once: true });
       }
     });
 
@@ -304,6 +335,49 @@ export function toggleTrenMayaLayers(show) {
   } else {
     if (map.hasLayer(trenMayaLineLayer)) map.removeLayer(trenMayaLineLayer);
     if (map.hasLayer(trenMayaStationsLayer)) map.removeLayer(trenMayaStationsLayer);
+  }
+}
+
+// --- Capas de DTC ---
+export function renderDTC(dtcData) {
+  dtcLayerGroup.clearLayers();
+  if (!dtcData) return;
+
+  const config = [
+    { key: 'pm', color: '#e07a5f' },
+    { key: 'mm', color: '#81b29a' },
+    { key: 'mk', color: '#f2cc8f' }
+  ];
+
+  config.forEach(c => {
+    const data = dtcData[c.key];
+    if (!data) return;
+    if (data.poly) {
+      L.geoJSON(data.poly, { style: { color: c.color, weight: 2, fillColor: c.color, fillOpacity: 0.3 } }).addTo(dtcLayerGroup);
+    }
+    if (data.points) {
+      L.geoJSON(data.points, { 
+        pointToLayer: (feature, latlng) => {
+          return L.circleMarker(latlng, {
+            radius: 5,
+            fillColor: c.color,
+            color: '#fff',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          });
+        }
+      }).addTo(dtcLayerGroup);
+    }
+  });
+}
+
+export function toggleDTCLayers(show) {
+  if (!map) return;
+  if (show) {
+    if (!map.hasLayer(dtcLayerGroup)) map.addLayer(dtcLayerGroup);
+  } else {
+    if (map.hasLayer(dtcLayerGroup)) map.removeLayer(dtcLayerGroup);
   }
 }
 

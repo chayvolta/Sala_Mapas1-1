@@ -5,8 +5,8 @@
 
 const _state = {
   sites: [],
-  filter: "all", // 'all' | 'cip' | 'marina' | 'pti'
-  year: 2025,
+  filter: "all", // 'all' | 'cip' | 'marina' | 'pti' | 'dtc'
+  year: 2026,
   selectedSiteId: null,
   searchTerm: "",
   sidebarOpen: true,

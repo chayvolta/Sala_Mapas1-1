@@ -51,7 +51,10 @@ export function renderSidebar(sites, state) {
     const img = site.images?.[0];
     return `
       <div class="site-card ${cls}" data-id="${site.id}">
-        ${img ? `<img src="${img}" alt="${site.name}" class="card-img" loading="lazy">` : ''}
+        ${img ? `<div class="card-img-wrap">
+          <img src="${img}" alt="${site.name}" class="card-img" loading="lazy">
+          <button class="view-more-btn card-img-btn" data-id="${site.id}">Ver detalles</button>
+        </div>` : ''}
         <div class="site-header">
           <div>
             <h3 class="site-name">${site.name}</h3>
@@ -60,7 +63,7 @@ export function renderSidebar(sites, state) {
           </div>
           <span class="site-badge ${badgeCls}">${tag}</span>
         </div>
-        <button class="view-more-btn" data-id="${site.id}">Ver detalles</button>
+        ${!img ? `<button class="view-more-btn" data-id="${site.id}">Ver detalles</button>` : ''}
       </div>`;
   }).join('');
 
@@ -112,14 +115,163 @@ export function updateSidebarState(state) {
 // --- Modal ---
 let _carouselIdx = 0;
 
+// Galerías locales por sitio (en orden)
+const SITE_GALLERIES = {
+  'cozumel': [
+    'img/Cozumel/1CO.webp',
+    'img/Cozumel/2 Información geográfica.webp',
+    'img/Cozumel/3CO.webp',
+    'img/Cozumel/4CO.webp',
+    'img/Cozumel/5CO.webp',
+    'img/Cozumel/6CO.webp'
+  ],
+  'acapulco-coyuca': [
+    'img/Aca/ACA 1 Introduccion.webp',
+    'img/Aca/ACA 2.webp',
+    'img/Aca/ACA 3 Mapa Plan.webp',
+    'img/Aca/ACA 4.webp',
+    'img/Aca/ACA 5.webp',
+    'img/Aca/ACA 6.webp',
+    'img/Aca/ACA 7.webp',
+    'img/Aca/ACA 8.webp',
+    'img/Aca/ACA 9.webp',
+    'img/Aca/ACA 10.webp',
+    'img/Aca/ACA 11.webp',
+    'img/Aca/ACA 12.webp'
+  ],
+  'los-cabos': [
+    'img/Cabos/CA1.webp',
+    'img/Cabos/CA2.webp',
+    'img/Cabos/CA3.webp',
+    'img/Cabos/CA4.webp',
+    'img/Cabos/CA5.webp',
+    'img/Cabos/CA6.webp'
+  ],
+  'marina-los-cabos': [
+    'img/Cabos/CA1.webp',
+    'img/Cabos/CA2.webp',
+    'img/Cabos/CA3.webp',
+    'img/Cabos/CA4.webp',
+    'img/Cabos/CA5.webp',
+    'img/Cabos/CA6.webp'
+  ],
+  'cancun': [
+    'img/Cancun/C1.webp',
+    'img/Cancun/c2.webp',
+    'img/Cancun/c3.webp',
+    'img/Cancun/C4.webp',
+    'img/Cancun/C5.webp',
+    'img/Cancun/C6.webp'
+  ],
+  'huatulco': [
+    'img/Huatulco/Huatulco 1.webp',
+    'img/Huatulco/Huatulco 2.webp',
+    'img/Huatulco/Huatulco 3.webp',
+    'img/Huatulco/Huatulco 4.webp',
+    'img/Huatulco/Huatulco 5.webp',
+    'img/Huatulco/Huatulco 6.webp'
+  ],
+  'ixtapa': [
+    'img/Ixtapa/Ixtapa 1.webp',
+    'img/Ixtapa/Ixtapa 2.webp',
+    'img/Ixtapa/Ixtapa 3.webp',
+    'img/Ixtapa/Ixtapa 4.webp',
+    'img/Ixtapa/Ixtapa 5.webp',
+    'img/Ixtapa/Ixtapa 6.webp'
+  ],
+  'litibu': [
+    'img/Lit/Lit_1.webp',
+    'img/Lit/Lit_2.webp',
+    'img/Lit/Lit_3.webp',
+    'img/Lit/Lit_4.webp',
+    'img/Lit/Lit_5.webp',
+    'img/Lit/Lit_6.webp',
+    'img/Lit/Lit_7.webp',
+    'img/Lit/Lit_8.webp',
+    'img/Lit/Lit_9.webp'
+  ],
+  'loreto': [
+    'img/Lor_Nop/Lor_Nop1.webp',
+    'img/Lor_Nop/Lor_Nop2.webp',
+    'img/Lor_Nop/Lor_Nop3.webp',
+    'img/Lor_Nop/Lor_Nop4.webp',
+    'img/Lor_Nop/Lor_Nop5.webp',
+    'img/Lor_Nop/Lor_Nop6.webp'
+  ],
+  'nopoló': [
+    'img/Lor_Nop/Lor_Nop1.webp',
+    'img/Lor_Nop/Lor_Nop2.webp',
+    'img/Lor_Nop/Lor_Nop3.webp',
+    'img/Lor_Nop/Lor_Nop4.webp',
+    'img/Lor_Nop/Lor_Nop5.webp',
+    'img/Lor_Nop/Lor_Nop6.webp'
+  ],
+  'puerto_escondido': [
+    'img/Lor_Nop/Lor_Nop1.webp',
+    'img/Lor_Nop/Lor_Nop2.webp',
+    'img/Lor_Nop/Lor_Nop3.webp',
+    'img/Lor_Nop/Lor_Nop4.webp',
+    'img/Lor_Nop/Lor_Nop5.webp',
+    'img/Lor_Nop/Lor_Nop6.webp'
+  ]
+};
+
 export function showModal(site) {
   const overlay = document.getElementById('modalOverlay');
+  const modal = overlay.querySelector('.modal');
   document.getElementById('modalTitle').textContent = site.name;
   _carouselIdx = 0;
 
-  // Carousel
   const carousel = document.getElementById('modalCarousel');
   const dots = document.getElementById('modalDots');
+  const body = document.getElementById('modalBody');
+
+  // --- Sitios con galería local: modal especial — solo imágenes, controles overlay ---
+  const galleryImgs = SITE_GALLERIES[site.id];
+  if (galleryImgs) {
+    modal.classList.add('modal--gallery');
+    const imgs = galleryImgs;
+    carousel.innerHTML = `
+      <button class="gallery-close-btn" id="galClose" aria-label="Cerrar">×</button>
+      <span class="gallery-counter" id="galCounter">1 / ${imgs.length}</span>
+      <button class="carousel-nav prev" id="cPrev">‹</button>
+      ${imgs.map((src, i) =>
+        `<img src="${encodeURI(src)}" alt="${site.name} – ${i + 1}" class="${i === 0 ? 'active' : ''}">`
+      ).join('')}
+      <button class="carousel-nav next" id="cNext">›</button>
+      <div class="gallery-dots-overlay">
+        ${imgs.map((_, i) =>
+          `<span class="dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`
+        ).join('')}
+      </div>`;
+    dots.innerHTML = '';
+    body.innerHTML = '';
+
+    // Carousel bindings con counter
+    const cImgs = carousel.querySelectorAll('img');
+    const cDots = carousel.querySelectorAll('.gallery-dots-overlay .dot');
+    const cCounter = document.getElementById('galCounter');
+    const goTo = (i) => {
+      cImgs[_carouselIdx]?.classList.remove('active');
+      cDots[_carouselIdx]?.classList.remove('active');
+      _carouselIdx = ((i % imgs.length) + imgs.length) % imgs.length;
+      cImgs[_carouselIdx]?.classList.add('active');
+      cDots[_carouselIdx]?.classList.add('active');
+      cCounter.textContent = `${_carouselIdx + 1} / ${imgs.length}`;
+    };
+    document.getElementById('cPrev')?.addEventListener('click', () => goTo(_carouselIdx - 1));
+    document.getElementById('cNext')?.addEventListener('click', () => goTo(_carouselIdx + 1));
+    cDots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.i)));
+    document.getElementById('galClose')?.addEventListener('click', () => overlay.classList.remove('active'));
+
+    overlay.classList.add('active');
+    return;
+  }
+
+
+  // --- Modal genérico para el resto de sitios ---
+  modal.classList.remove('modal--gallery');
+
   if (site.images?.length) {
     carousel.innerHTML = `
       <button class="carousel-nav prev" id="cPrev">‹</button>
@@ -147,7 +299,7 @@ export function showModal(site) {
     </div></div>`;
   }
 
-  document.getElementById('modalBody').innerHTML = `
+  body.innerHTML = `
     <div class="modal-section"><h3>Información General</h3>
       <div class="modal-grid">
         <div class="modal-item"><div class="modal-label">Tipo</div><div class="modal-value">${tag}</div></div>

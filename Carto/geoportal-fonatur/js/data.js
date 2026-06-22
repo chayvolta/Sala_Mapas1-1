@@ -51,3 +51,34 @@ export async function loadPolygon(filename) {
     return null;
   }
 }
+
+/** Carga de datos de DTC */
+export async function loadDTCData() {
+  try {
+    const [pmPoly, pmPoints, mmPoly, mmPoints, mkPoly, mkPoints] = await Promise.all([
+      fetch(`${BASE}/polygons/poligono_mancomunados.geojson`),
+      fetch(`${BASE}/points/mancomunados_points.geojson`),
+      fetch(`${BASE}/polygons/mayab_poligonos.geojson`),
+      fetch(`${BASE}/points/mayab_points.geojson`),
+      fetch(`${BASE}/polygons/mayakaan_poli.geojson`),
+      fetch(`${BASE}/points/mayakaan_points.geojson`)
+    ]);
+    return {
+      pm: {
+        poly: pmPoly.ok ? await pmPoly.json() : null,
+        points: pmPoints.ok ? await pmPoints.json() : null
+      },
+      mm: {
+        poly: mmPoly.ok ? await mmPoly.json() : null,
+        points: mmPoints.ok ? await mmPoints.json() : null
+      },
+      mk: {
+        poly: mkPoly.ok ? await mkPoly.json() : null,
+        points: mkPoints.ok ? await mkPoints.json() : null
+      }
+    };
+  } catch (err) {
+    console.error('Error cargando DTC:', err);
+    return null;
+  }
+}

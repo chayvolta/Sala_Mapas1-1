@@ -14,8 +14,7 @@
       "Turistas": "6 millones/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1568402102990-bc541580b59f?w=600&q=75",
-      "https://images.unsplash.com/photo-1512813498716-47110fdbd281?w=600&q=75"
+      "img/Cancun/C1.webp"
     ],
     "polygon": "Cancun.geojson"
   },
@@ -34,8 +33,7 @@
       "Turistas": "6 millones/año"
     },
     "images": [
-      "https://www.gob.mx/cms/uploads/action_program/main_image/20118/post_Marinas-DJI_0520-Cozumel_2000px.jpg",
-      "https://emeequis.com/wp-content/uploads/2024/01/Marina%20Cozumel:%20un%20negocio%20millonario%20casi%20regalado%20por%20Fonatur%20a%20exdirector%20de%20Mota-Engil.png"
+      "img/Cozumel/1CO.webp"
     ],
     "polygon": "Cozumel.geojson"
   },
@@ -54,7 +52,7 @@
       "Turistas": "500,000/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1582610285985-a42d3d8c7041?w=600&q=75"
+      "img/Ixtapa/Ixtapa 1.webp"
     ],
     "polygon": "Ixtapa.geojson"
   },
@@ -73,7 +71,7 @@
       "Turistas": "3 millones/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=75"
+      "img/Cabos/CA1.webp"
     ],
     "polygon": null
   },
@@ -92,7 +90,7 @@
       "Turistas": "150,000/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=75"
+      "img/Lor_Nop/Lor_Nop1.webp"
     ],
     "polygon": null
   },
@@ -111,7 +109,7 @@
       "Turistas": "150,000/año"
     },
     "images": [
-      "https://i0.wp.com/foodandpleasure.com/wp-content/uploads/2024/06/nopolo-pueblo-de-loreto2.jpg?w=1080&ssl=1"
+      "img/Lor_Nop/Lor_Nop1.webp"
     ],
     "polygon": null
   },
@@ -130,7 +128,7 @@
       "Turistas": "150,000/año"
     },
     "images": [
-      "https://misionloreto.com/wp-content/uploads/2011/03/boats.jpg"
+      "img/Lor_Nop/Lor_Nop1.webp"
     ],
     "polygon": null
   },
@@ -149,7 +147,7 @@
       "Turistas": "800,000/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=75"
+      "img/Huatulco/Huatulco 1.webp"
     ],
     "polygon": null
   },
@@ -168,7 +166,7 @@
       "Turistas": "1.5 millones/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=75"
+      "img/Aca/ACA 1 Introduccion.webp"
     ],
     "polygon": null
   },
@@ -187,7 +185,7 @@
       "Turistas": "Meta 500,000/año"
     },
     "images": [
-      "https://cbcmexico.mx/uploads/200176/659-litibu.jpg"
+      "img/Lit/Lit_1.webp"
     ],
     "polygon": null
   },
@@ -206,7 +204,7 @@
       "Turistas": "300,000/año"
     },
     "images": [
-      "https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=600&q=75"
+      "img/Cabos/CA1.webp"
     ],
     "polygon": null
   }

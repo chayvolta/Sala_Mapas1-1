@@ -1,0 +1,21 @@
+{
+"type": "FeatureCollection",
+"name": "mayakaan_points",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "nombre_estimado": "Chunhuhub", "confianza": "Alta", "nota": "Coincide con localidad Chunhuhub; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.60198975, 19.5856689 ] } },
+{ "type": "Feature", "properties": { "id": 2, "nombre_estimado": "Tihosuco", "confianza": "Alta", "nota": "Coincide con localidad Tihosuco; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.38500977, 20.19519064 ] } },
+{ "type": "Feature", "properties": { "id": 3, "nombre_estimado": "Señor", "confianza": "Alta", "nota": "Coincide con localidad Señor; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.14605713, 19.84164356 ] } },
+{ "type": "Feature", "properties": { "id": 4, "nombre_estimado": "Muyil", "confianza": "Alta", "nota": "Coincide con zona de Muyil; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -87.62145996, 20.0765701 ] } },
+{ "type": "Feature", "properties": { "id": 5, "nombre_estimado": "Kantemó", "confianza": "Alta", "nota": "Coincide con Kantemó/Beej Ka’ax Ha; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.8079834, 19.92945923 ] } },
+{ "type": "Feature", "properties": { "id": 6, "nombre_estimado": "Felipe Carrillo Puerto", "confianza": "Media-Alta", "nota": "Punto cercano a Felipe Carrillo Puerto; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.06640625, 19.57790571 ] } },
+{ "type": "Feature", "properties": { "id": 7, "nombre_estimado": "X-Cabil", "confianza": "Alta", "nota": "Coincide con X-Cabil por proximidad de coordenadas." }, "geometry": { "type": "Point", "coordinates": [ -88.47015381, 20.16425483 ] } },
+{ "type": "Feature", "properties": { "id": 8, "nombre_estimado": "Sabán / zona de Sabán", "confianza": "Media", "nota": "Punto cercano a Sabán; el DOM no contiene etiqueta, por eso queda como estimación." }, "geometry": { "type": "Point", "coordinates": [ -88.5333252, 20.04303061 ] } },
+{ "type": "Feature", "properties": { "id": 9, "nombre_estimado": "Sabán", "confianza": "Alta", "nota": "Coincide con coordenadas conocidas de Sabán." }, "geometry": { "type": "Point", "coordinates": [ -88.54980469, 20.03528971 ] } },
+{ "type": "Feature", "properties": { "id": 10, "nombre_estimado": "Sacalaca", "confianza": "Alta", "nota": "Coincide con coordenadas conocidas de Sacalaca." }, "geometry": { "type": "Point", "coordinates": [ -88.60198975, 20.06367115 ] } },
+{ "type": "Feature", "properties": { "id": 11, "nombre_estimado": "Punta Allen", "confianza": "Alta", "nota": "Coincide con Punta Allen; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -87.4786377, 19.80030171 ] } },
+{ "type": "Feature", "properties": { "id": 12, "nombre_estimado": "Noh-Bec", "confianza": "Alta", "nota": "Coincide con coordenadas conocidas de Noh-Bec; nombre respaldado en catálogo Maya Ka’an." }, "geometry": { "type": "Point", "coordinates": [ -88.17077637, 19.1451682 ] } },
+{ "type": "Feature", "properties": { "id": 13, "nombre_estimado": "José María Morelos", "confianza": "Media-Alta", "nota": "Punto cercano a cabecera José María Morelos." }, "geometry": { "type": "Point", "coordinates": [ -88.72009277, 19.75119432 ] } },
+{ "type": "Feature", "properties": { "id": 14, "nombre_estimado": "X-Pichil", "confianza": "Alta", "nota": "Coincide con X-Pichil por proximidad de coordenadas." }, "geometry": { "type": "Point", "coordinates": [ -88.38226318, 19.69690014 ] } }
+]
+}
