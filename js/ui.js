@@ -334,9 +334,11 @@ export function bindEvents() {
   // Timeline
   const slider = document.getElementById('timelineSlider');
   const yearDisp = document.getElementById('currentYear');
+  const timelineLabel = document.querySelector('.timeline-label');
   slider.addEventListener('input', e => {
     const y = parseInt(e.target.value);
     yearDisp.textContent = y;
+    if (timelineLabel) timelineLabel.setAttribute('data-year', y);
     AppState.set({ year: y });
   });
 
@@ -354,17 +356,19 @@ export function bindEvents() {
     AppState.set({ searchTerm: e.target.value });
   });
 
-  // Toggle sidebar
+  // Toggle sidebar (solo si existe el botón)
   const sidebar = document.getElementById('sidebar');
   const togBtn = document.getElementById('toggleSidebar');
-  const togIcon = document.getElementById('toggleIcon');
-  togBtn.addEventListener('click', () => {
-    const open = !sidebar.classList.contains('collapsed');
-    sidebar.classList.toggle('collapsed');
-    togBtn.classList.toggle('collapsed');
-    togIcon.textContent = open ? '▶' : '◀';
-    setTimeout(() => MapModule.getMap()?.invalidateSize(), 350);
-  });
+  if (togBtn) {
+    const togIcon = document.getElementById('toggleIcon');
+    togBtn.addEventListener('click', () => {
+      const open = !sidebar.classList.contains('collapsed');
+      sidebar.classList.toggle('collapsed');
+      togBtn.classList.toggle('collapsed');
+      if (togIcon) togIcon.textContent = open ? '▼' : '▲';
+      setTimeout(() => MapModule.getMap()?.invalidateSize(), 350);
+    });
+  }
 
   // Reset view
   document.getElementById('resetView').addEventListener('click', () => {

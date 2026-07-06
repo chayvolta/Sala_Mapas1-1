@@ -24,12 +24,14 @@
 <body>
 
 <div id="app">
-  <!-- ===== SIDEBAR ===== -->
+  <!-- ===== TOP BAR ===== -->
   <aside id="sidebar">
+
+    <!-- Marca / Título -->
     <header class="header">
       <div class="header-content">
         <h1>Desarrollos FONATUR</h1>
-        <p>Centros Integralmente Planeados, PTI y Marinas Turísticas de México</p>
+        <p>CIP, PTI y Marinas Turísticas de México</p>
         <div class="header-stats">
           <div class="header-stat">
             <span>📊</span><span id="totalSites">0 desarrollos</span>
@@ -40,27 +42,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Timeline -->
-    <div class="timeline-control">
-      <label class="timeline-label" for="timelineSlider">Línea de Tiempo</label>
-      <input type="range" class="timeline-slider" id="timelineSlider"
-             min="1970" max="2026" value="2026" step="1"
-             aria-label="Filtrar por año">
-      <div class="timeline-years">
-        <span>1970</span><span>1985</span><span>2000</span><span>2015</span><span>2026</span>
-      </div>
-      <div class="timeline-current">Año: <span id="currentYear">2026</span></div>
-    </div>
-
-    <!-- Filter chips -->
-    <div class="filter-chips" role="group" aria-label="Filtrar por tipo">
-      <button class="filter-chip active" data-filter="all">Todos</button>
-      <button class="filter-chip" data-filter="cip">CIP</button>
-      <button class="filter-chip" data-filter="marina">Marinas</button>
-      <button class="filter-chip" data-filter="pti">PTI</button>
-      <button class="filter-chip" data-filter="dtc">DTC</button>
-    </div>
 
     <!-- Leyenda Viva -->
     <div class="legend-live">
@@ -78,25 +59,46 @@
           <span class="legend-dot legend-dot--pti"></span>
           PTI <span id="legendPtiCount" class="legend-count">0</span>
         </div>
-        <div class="legend-item" style="margin-top:8px; border-top:1px solid var(--border); padding-top:12px; width:100%;">
-          <span style="display:inline-block; width:12px; height:12px; background:#e07a5f; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
-          Pueblos Mancomunados
+        <div class="legend-item">
+          <span style="display:inline-block;width:11px;height:11px;background:#e07a5f;border-radius:50%;margin-right:3px;vertical-align:middle;"></span>
+          P. Mancomunados
         </div>
         <div class="legend-item">
-          <span style="display:inline-block; width:12px; height:12px; background:#81b29a; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
+          <span style="display:inline-block;width:11px;height:11px;background:#81b29a;border-radius:50%;margin-right:3px;vertical-align:middle;"></span>
           Camino del Mayab
         </div>
         <div class="legend-item">
-          <span style="display:inline-block; width:12px; height:12px; background:#f2cc8f; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>
+          <span style="display:inline-block;width:11px;height:11px;background:#f2cc8f;border-radius:50%;margin-right:3px;vertical-align:middle;"></span>
           Maya Kahan
         </div>
-        <div class="legend-item" style="margin-top:8px; border-top:1px solid var(--border); padding-top:12px; width:100%;">
-          <span style="display:inline-block; width:18px; height:4px; background:#3B3B3B; border-bottom: 2px dashed #45BB64; margin-right:4px; vertical-align:middle;"></span>
-          Trazo Tren Maya
-        </div>
         <div class="legend-item">
-          <img src="img/estaciones/1_Palenque.png" width="16" height="16" style="border-radius:2px; margin-right:4px; display:inline-block; vertical-align:middle; border:1px solid #45BB64;" alt="icono" onerror="this.src='https://placehold.co/16x16/235c4e/45bb64/png?text=TM'"> Estaciones y Paraderos
+          <span style="display:inline-block;width:16px;height:3px;background:#3B3B3B;border-bottom:2px dashed #45BB64;margin-right:3px;vertical-align:middle;"></span>
+          Tren Maya
         </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-control">
+      <label class="timeline-label" for="timelineSlider" data-year="2026">Año:&nbsp;</label>
+      <input type="range" class="timeline-slider" id="timelineSlider"
+             min="1970" max="2026" value="2026" step="1"
+             aria-label="Filtrar por año">
+      <div class="timeline-years">
+        <span>1970</span><span>1985</span><span>2000</span><span>2015</span><span>2026</span>
+      </div>
+      <div class="timeline-current">Año: <span id="currentYear">2026</span></div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-chips" role="group" aria-label="Filtrar por tipo">
+      <div class="legend-title">Filtrar</div>
+      <div class="filter-chips-row">
+        <button class="filter-chip active" data-filter="all">Todos</button>
+        <button class="filter-chip" data-filter="cip">CIP</button>
+        <button class="filter-chip" data-filter="marina">Marinas</button>
+        <button class="filter-chip" data-filter="pti">PTI</button>
+        <button class="filter-chip" data-filter="dtc">DTC</button>
       </div>
     </div>
 
@@ -104,13 +106,13 @@
     <div class="search-container">
       <div class="search-box">
         <input type="text" class="search-input" id="searchInput"
-               placeholder="Buscar por nombre o estado..."
+               placeholder="Buscar..."
                aria-label="Buscar desarrollos">
         <span class="search-icon">🔍</span>
       </div>
     </div>
 
-    <!-- Sites list -->
+    <!-- Sites list (oculta — acceso por popups del mapa) -->
     <div class="sites-list" id="sitesList" role="list"></div>
   </aside>
 
@@ -128,11 +130,6 @@
       <span>© 2026 Geoportal FONATUR</span>
     </div>
   </main>
-
-  <!-- Toggle sidebar -->
-  <button class="toggle-sidebar" id="toggleSidebar" aria-label="Mostrar/ocultar panel">
-    <span id="toggleIcon">◀</span>
-  </button>
 </div>
 
 <!-- ===== MODAL ===== -->

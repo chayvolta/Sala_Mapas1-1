@@ -22,6 +22,8 @@ async function boot() {
     MapModule.toggleTrenMayaLayers(AppState.get('year') >= 2024);
     MapModule.renderDTC(dtcData);
     MapModule.toggleDTCLayers(AppState.get('year') >= 2026 && (AppState.get('filter') === 'all' || AppState.get('filter') === 'dtc'));
+    // Asegurar que Leaflet mide el contenedor correctamente tras el layout flex-column
+    setTimeout(() => MapModule.getMap()?.invalidateSize(), 100);
 
     // 3) Bindear eventos UI
     UI.bindEvents();

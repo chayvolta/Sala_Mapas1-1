@@ -17,8 +17,10 @@ let baseLayerSat = null;
 let currentBasemap = 'light';
 const markerRefs = new Map();
 
-const MX_CENTER = [23.6345, -102.5528];
-const MX_ZOOM = 6;
+const MX_BOUNDS = [
+  [14.5, -118.0], // Suroeste de México
+  [32.5, -86.0]   // Noreste de México
+];
 
 const COLORS = {
   cip:    { bg: '#235C4E', icon: '🏗️' },
@@ -41,10 +43,11 @@ export function onMarkerDetailsClick(fn) { _onDetailsClickCb = fn; }
 // --- Init ---
 export function initMap() {
   map = L.map('map', {
-    center: MX_CENTER,
-    zoom: MX_ZOOM,
     zoomControl: false
   });
+  
+  // Auto-ajusta el zoom/centro según el viewport disponible
+  map.fitBounds(MX_BOUNDS, { padding: [20, 20] });
 
   baseLayerLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://carto.com/">CARTO</a> | FONATUR 2026',
@@ -101,7 +104,20 @@ export function getMap() { return map; }
 // --- Markers ---
 function buildIcon(type, selected, hovered) {
   const bg = selected ? SELECTED_BG : COLORS[type]?.bg || '#9d2449';
-  const sz = selected ? 34 : hovered ? 30 : 26;
+  
+  // Determinar el tamaño dinámicamente según el tamaño y orientación de pantalla
+  let sz = 26; // por defecto (desktop normal)
+  const isTotem = window.matchMedia('(orientation: portrait) and (min-width: 769px)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  if (isTotem) {
+    sz = selected ? 48 : hovered ? 42 : 38;
+  } else if (isMobile) {
+    sz = selected ? 38 : hovered ? 34 : 30;
+  } else {
+    sz = selected ? 34 : hovered ? 30 : 26;
+  }
+
   const glow = selected
     ? '0 0 18px rgba(188,149,92,.6)'
     : hovered
@@ -190,10 +206,19 @@ export function renderMarkers(sites, state) {
     const hov = state.hoveredSiteId === site.id;
     const icon = buildIcon(site.type, sel, hov);
 
+    const isTotem = window.matchMedia('(orientation: portrait) and (min-width: 769px)').matches;
     const isGallery = !!GALLERY_COVER[site.id];
-    const popupOpts = isGallery
-      ? { maxWidth: 500, minWidth: 360, className: 'fonatur-station-popup gallery-station-popup' }
-      : { maxWidth: 300, minWidth: 260, className: 'fonatur-station-popup' };
+    
+    let popupOpts;
+    if (isTotem) {
+      popupOpts = isGallery
+        ? { maxWidth: 600, minWidth: 460, className: 'fonatur-station-popup gallery-station-popup' }
+        : { maxWidth: 400, minWidth: 320, className: 'fonatur-station-popup' };
+    } else {
+      popupOpts = isGallery
+        ? { maxWidth: 500, minWidth: 360, className: 'fonatur-station-popup gallery-station-popup' }
+        : { maxWidth: 300, minWidth: 260, className: 'fonatur-station-popup' };
+    }
 
     const marker = L.marker([site.lat, site.lng], { icon })
       .bindPopup(popupHTML(site), popupOpts);
@@ -389,7 +414,7 @@ export function flyToSite(site) {
 
 export function resetView() {
   if (!map) return;
-  map.flyTo(MX_CENTER, MX_ZOOM, { duration: 1 });
+  map.fitBounds(MX_BOUNDS, { padding: [20, 20], duration: 1 });
 }
 
 // --- Highlight (para hover desde UI) ---
