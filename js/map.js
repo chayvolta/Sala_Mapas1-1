@@ -364,33 +364,141 @@ export function toggleTrenMayaLayers(show) {
 }
 
 // --- Capas de DTC ---
+
+// Imágenes y configuración por capa DTC
+const DTC_CONFIG = {
+  pm: {
+    color: '#e07a5f',
+    label: 'P. Mancomunados',
+    nameField: 'NOMGEO',
+    municipioField: 'NOM_MUN',
+    images: [
+      'img/Mancomunados/DTC PM 1 Intro (1).webp',
+      'img/Mancomunados/DTC PM 2 Aportaciones.webp',
+      'img/Mancomunados/DTC PM 3 Fotos.webp'
+    ]
+  },
+  mm: {
+    color: '#81b29a',
+    label: 'Camino del Mayab',
+    nameField: 'NOMGEO',
+    municipioField: 'NOM_MUN',
+    images: [
+      'img/Mayab/Mayab1.webp',
+      'img/Mayab/Mayab2.webp',
+      'img/Mayab/Mayab3.webp'
+    ]
+  },
+  mk: {
+    color: '#f2cc8f',
+    label: 'Maya Kaan',
+    nameField: 'nombre_estimado',
+    municipioField: null,
+    images: [
+      'img/Maya_Kaan/Maya Kaan 1.webp',
+      'img/Maya_Kaan/Maya Kaan 2.webp',
+      'img/Maya_Kaan/Maya Kaan 3.webp'
+    ]
+  }
+};
+
+function buildDTCPopupHTML(feature, cfg) {
+  const name = feature.properties[cfg.nameField] || 'Sin nombre';
+  const mun  = cfg.municipioField ? (feature.properties[cfg.municipioField] || '') : '';
+  const [img1, img2, img3] = cfg.images;
+
+  return `<div class="dtc-popup-card">
+    <div class="dtc-carousel" id="dtcCar_${Math.random().toString(36).slice(2)}">
+      <div class="dtc-slides">
+        <img class="dtc-slide active" src="${encodeURI(img1)}" alt="${cfg.label} - imagen 1">
+        <img class="dtc-slide" src="${encodeURI(img2)}" alt="${cfg.label} - imagen 2">
+        <img class="dtc-slide" src="${encodeURI(img3)}" alt="${cfg.label} - imagen 3">
+      </div>
+      <button class="dtc-nav dtc-nav-prev" aria-label="Anterior">&#8249;</button>
+      <button class="dtc-nav dtc-nav-next" aria-label="Siguiente">&#8250;</button>
+      <div class="dtc-dots">
+        <span class="dtc-dot active"></span>
+        <span class="dtc-dot"></span>
+        <span class="dtc-dot"></span>
+      </div>
+      <span class="spc-badge dtc-badge" style="background:${cfg.color};">${cfg.label}</span>
+    </div>
+    <div class="spc-body">
+      <h3 class="spc-title" style="color:${cfg.color}; font-size:15px;">${name}</h3>
+      ${mun ? `<div class="spc-subtitle">${mun}</div>` : ''}
+    </div>
+  </div>`;
+}
+
 export function renderDTC(dtcData) {
   dtcLayerGroup.clearLayers();
   if (!dtcData) return;
 
-  const config = [
-    { key: 'pm', color: '#e07a5f' },
-    { key: 'mm', color: '#81b29a' },
-    { key: 'mk', color: '#f2cc8f' }
-  ];
-
-  config.forEach(c => {
-    const data = dtcData[c.key];
+  Object.entries(DTC_CONFIG).forEach(([key, cfg]) => {
+    const data = dtcData[key];
     if (!data) return;
+
     if (data.poly) {
-      L.geoJSON(data.poly, { style: { color: c.color, weight: 2, fillColor: c.color, fillOpacity: 0.3 } }).addTo(dtcLayerGroup);
+      L.geoJSON(data.poly, {
+        style: { color: cfg.color, weight: 2, fillColor: cfg.color, fillOpacity: 0.3 }
+      }).addTo(dtcLayerGroup);
     }
+
     if (data.points) {
-      L.geoJSON(data.points, { 
+      L.geoJSON(data.points, {
         pointToLayer: (feature, latlng) => {
-          return L.circleMarker(latlng, {
-            radius: 5,
-            fillColor: c.color,
+          const name = feature.properties[cfg.nameField] || '';
+          const marker = L.circleMarker(latlng, {
+            radius: 6,
+            fillColor: cfg.color,
             color: '#fff',
-            weight: 1,
+            weight: 2,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.9
           });
+
+          // Tooltip permanente con el nombre del punto
+          if (name) {
+            marker.bindTooltip(name, {
+              permanent: true,
+              direction: 'top',
+              offset: [0, -8],
+              className: `dtc-label dtc-label--${key}`
+            });
+          }
+
+          // Popup tipo card con carrusel
+          const popupHTML = buildDTCPopupHTML(feature, cfg);
+          marker.bindPopup(popupHTML, {
+            className: 'fonatur-station-popup dtc-station-popup',
+            maxWidth: 300,
+            minWidth: 260
+          });
+
+          // Inicializar carrusel al abrir el popup
+          marker.on('popupopen', (e) => {
+            const el = e.popup.getElement();
+            if (!el) return;
+            const slides = el.querySelectorAll('.dtc-slide');
+            const dots   = el.querySelectorAll('.dtc-dot');
+            const prev   = el.querySelector('.dtc-nav-prev');
+            const next   = el.querySelector('.dtc-nav-next');
+            let current  = 0;
+
+            const goTo = (idx) => {
+              slides[current].classList.remove('active');
+              dots[current].classList.remove('active');
+              current = (idx + slides.length) % slides.length;
+              slides[current].classList.add('active');
+              dots[current].classList.add('active');
+            };
+
+            prev?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current - 1); });
+            next?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current + 1); });
+            dots.forEach((dot, i) => dot.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(i); }));
+          });
+
+          return marker;
         }
       }).addTo(dtcLayerGroup);
     }
