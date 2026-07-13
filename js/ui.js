@@ -213,6 +213,24 @@ const SITE_GALLERIES = {
     'img/Lor_Nop/Lor_Nop4.webp',
     'img/Lor_Nop/Lor_Nop5.webp',
     'img/Lor_Nop/Lor_Nop6.webp'
+  ],
+  // --- DTC: Pueblos Mancomunados ---
+  'dtc-pm': [
+    'img/Mancomunados/DTC PM 1 Intro (1).webp',
+    'img/Mancomunados/DTC PM 2 Aportaciones.webp',
+    'img/Mancomunados/DTC PM 3 Fotos.webp'
+  ],
+  // --- DTC: Camino del Mayab ---
+  'dtc-mm': [
+    'img/Mayab/Mayab1.webp',
+    'img/Mayab/Mayab2.webp',
+    'img/Mayab/Mayab3.webp'
+  ],
+  // --- DTC: Maya Ka'an ---
+  'dtc-mk': [
+    'img/Maya_Kaan/Maya Kaan 1.webp',
+    'img/Maya_Kaan/Maya Kaan 2.webp',
+    'img/Maya_Kaan/Maya Kaan 3.webp'
   ]
 };
 
@@ -329,6 +347,18 @@ function bindCarousel(total) {
   dots.forEach(d => d.addEventListener('click', () => go(+d.dataset.i)));
 }
 
+// Abre el modal de galería para un punto DTC
+export function showDTCModal({ key, name, cfg }) {
+  const galleryImgs = SITE_GALLERIES[`dtc-${key}`];
+  // Construye un objeto pseudo-site compatible con showModal
+  const pseudoSite = {
+    id: `dtc-${key}`,
+    name: `${cfg.label} — ${name}`,
+    images: galleryImgs || cfg.images
+  };
+  showModal(pseudoSite);
+}
+
 // --- Bind all events ---
 export function bindEvents() {
   // Timeline
@@ -404,6 +434,10 @@ export function bindEvents() {
   
   MapModule.onMarkerDetailsClick(site => {
     showModal(site);
+  });
+
+  MapModule.onDTCDetailsClick(dtcInfo => {
+    showDTCModal(dtcInfo);
   });
   
   MapModule.onMarkerHover(id => AppState.set({ hoveredSiteId: id }));

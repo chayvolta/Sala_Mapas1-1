@@ -17,6 +17,16 @@ let baseLayerSat = null;
 let currentBasemap = 'light';
 const markerRefs = new Map();
 
+// Zoom mínimo para mostrar etiquetas de puntos
+const LABEL_MIN_ZOOM = 10;
+
+// Etiquetas DTC (se limpian cuando se re-renderiza la capa DTC)
+const _dtcLabelMarkers = [];
+// Etiquetas Tren Maya (permanentes mientras exista la capa)
+const _tmLabelMarkers = [];
+// Bounds por capa DTC
+const dtcLayerBounds = new Map();
+
 const MX_BOUNDS = [
   [14.5, -118.0], // Suroeste de México
   [32.5, -86.0]   // Noreste de México
@@ -34,11 +44,13 @@ let _onClickCb = null;
 let _onHoverCb = null;
 let _onHoverEndCb = null;
 let _onDetailsClickCb = null;
+let _onDTCDetailsClickCb = null;
 
 export function onMarkerClick(fn)    { _onClickCb = fn; }
 export function onMarkerHover(fn)    { _onHoverCb = fn; }
 export function onMarkerHoverEnd(fn) { _onHoverEndCb = fn; }
 export function onMarkerDetailsClick(fn) { _onDetailsClickCb = fn; }
+export function onDTCDetailsClick(fn)    { _onDTCDetailsClickCb = fn; }
 
 // --- Init ---
 export function initMap() {
@@ -82,6 +94,9 @@ export function initMap() {
     }
   }).addTo(map);
   
+  // Mostrar/ocultar etiquetas según zoom
+  map.on('zoomend', _updateZoomLabels);
+
   return map;
 }
 
@@ -100,6 +115,24 @@ export function toggleBasemap() {
 }
 
 export function getMap() { return map; }
+
+// Muestra u oculta todos los tooltips registrados según el zoom actual
+function _updateZoomLabels() {
+  if (!map) return;
+  const z = map.getZoom();
+  [..._dtcLabelMarkers, ..._tmLabelMarkers].forEach(({ marker, minZoom }) => {
+    const show = z >= (minZoom ?? LABEL_MIN_ZOOM);
+    if (show) marker.openTooltip();
+    else marker.closeTooltip();
+  });
+}
+
+// Registra un marker para control de tooltip por zoom
+function _registerZoomLabel(marker, minZoom, isTM) {
+  const entry = { marker, minZoom: minZoom ?? LABEL_MIN_ZOOM };
+  if (isTM) _tmLabelMarkers.push(entry);
+  else _dtcLabelMarkers.push(entry);
+}
 
 // --- Markers ---
 function buildIcon(type, selected, hovered) {
@@ -312,6 +345,7 @@ export function renderTrenMaya(trazo, estaciones) {
         
         const marker = L.marker(latlng, { icon });
         const tag = feature.properties.TIPO; // Estación o Paradero
+        const nomOf = feature.properties.NOM_OF || '';
         
         marker.bindPopup(`<div class="station-popup-card">
           <div class="spc-cover" style="background-image: url('${iconUrl}');">
@@ -320,7 +354,7 @@ export function renderTrenMaya(trazo, estaciones) {
             </div>
           </div>
           <div class="spc-body">
-            <h3 class="spc-title">${feature.properties.NOM_OF}</h3>
+            <h3 class="spc-title">${nomOf}</h3>
             <div class="spc-subtitle">TRAMO ${feature.properties.TRAMO}</div>
             
             <div class="spc-info-grid">
@@ -340,6 +374,17 @@ export function renderTrenMaya(trazo, estaciones) {
           </div>
         </div>`, { className: 'fonatur-station-popup', maxWidth: 300, minWidth: 260 });
         
+        // Tooltip con nombre visible solo a zoom alto
+        if (nomOf) {
+          marker.bindTooltip(nomOf, {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -22],
+            className: 'dtc-label dtc-label--tm'
+          });
+          _registerZoomLabel(marker, LABEL_MIN_ZOOM, true); // isTM = true
+        }
+
         marker.on('click', () => {
            if (map) map.flyTo(latlng, 13, { duration: 1.5, easeLinearity: .25 });
         });
@@ -349,6 +394,8 @@ export function renderTrenMaya(trazo, estaciones) {
     });
 
     trenMayaStationsLayer.addLayer(geoLayer);
+    // Aplicar visibilidad inicial al añadir la capa
+    setTimeout(_updateZoomLabels, 0);
   }
 }
 
@@ -426,26 +473,36 @@ function buildDTCPopupHTML(feature, cfg) {
     <div class="spc-body">
       <h3 class="spc-title" style="color:${cfg.color}; font-size:15px;">${name}</h3>
       ${mun ? `<div class="spc-subtitle">${mun}</div>` : ''}
+      <button class="view-more-btn dtc-details-btn" style="width:100%; margin-top:10px;">Ver detalles</button>
     </div>
   </div>`;
 }
 
 export function renderDTC(dtcData) {
   dtcLayerGroup.clearLayers();
+  // Limpiar SOLO las etiquetas DTC (no las del Tren Maya)
+  _dtcLabelMarkers.length = 0;
+  dtcLayerBounds.clear();
   if (!dtcData) return;
 
   Object.entries(DTC_CONFIG).forEach(([key, cfg]) => {
     const data = dtcData[key];
     if (!data) return;
 
+    // Acumular bounds de esta capa
+    const bounds = L.latLngBounds([]);
+
     if (data.poly) {
-      L.geoJSON(data.poly, {
+      const polyLayer = L.geoJSON(data.poly, {
         style: { color: cfg.color, weight: 2, fillColor: cfg.color, fillOpacity: 0.3 }
-      }).addTo(dtcLayerGroup);
+      });
+      polyLayer.on('click', () => _flyToDTCBounds(key));
+      polyLayer.addTo(dtcLayerGroup);
+      try { bounds.extend(polyLayer.getBounds()); } catch(_) {}
     }
 
     if (data.points) {
-      L.geoJSON(data.points, {
+      const pointsLayer = L.geoJSON(data.points, {
         pointToLayer: (feature, latlng) => {
           const name = feature.properties[cfg.nameField] || '';
           const marker = L.circleMarker(latlng, {
@@ -457,7 +514,7 @@ export function renderDTC(dtcData) {
             fillOpacity: 0.9
           });
 
-          // Tooltip permanente con el nombre del punto
+          // Tooltip controlado por zoom (no permanente hasta que el zoom sea suficiente)
           if (name) {
             marker.bindTooltip(name, {
               permanent: true,
@@ -465,6 +522,7 @@ export function renderDTC(dtcData) {
               offset: [0, -8],
               className: `dtc-label dtc-label--${key}`
             });
+            _registerZoomLabel(marker, LABEL_MIN_ZOOM, false); // isTM = false
           }
 
           // Popup tipo card con carrusel
@@ -475,6 +533,9 @@ export function renderDTC(dtcData) {
             minWidth: 260
           });
 
+          // Fly to al hacer clic en el punto
+          marker.on('click', () => _flyToDTCBounds(key));
+
           // Inicializar carrusel al abrir el popup
           marker.on('popupopen', (e) => {
             const el = e.popup.getElement();
@@ -483,6 +544,7 @@ export function renderDTC(dtcData) {
             const dots   = el.querySelectorAll('.dtc-dot');
             const prev   = el.querySelector('.dtc-nav-prev');
             const next   = el.querySelector('.dtc-nav-next');
+            const detBtn = el.querySelector('.dtc-details-btn');
             let current  = 0;
 
             const goTo = (idx) => {
@@ -496,14 +558,41 @@ export function renderDTC(dtcData) {
             prev?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current - 1); });
             next?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current + 1); });
             dots.forEach((dot, i) => dot.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(i); }));
+
+            // Botón "Ver detalles" → abre modal con galería completa
+            if (detBtn) {
+              detBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                const pointName = feature.properties[cfg.nameField] || cfg.label;
+                _onDTCDetailsClickCb?.({ key, name: pointName, cfg });
+              }, { once: true });
+            }
           });
 
+          bounds.extend(latlng);
           return marker;
         }
-      }).addTo(dtcLayerGroup);
+      });
+      pointsLayer.addTo(dtcLayerGroup);
     }
+
+    if (bounds.isValid()) dtcLayerBounds.set(key, bounds);
   });
+
+  // Aplicar visibilidad inicial de etiquetas
+  setTimeout(_updateZoomLabels, 0);
 }
+
+// Vuela al bounds de una capa DTC por su key
+function _flyToDTCBounds(key) {
+  if (!map) return;
+  const b = dtcLayerBounds.get(key);
+  if (!b || !b.isValid()) return;
+  map.flyToBounds(b, { padding: [40, 40], duration: 1.5, easeLinearity: 0.25 });
+}
+
+// API pública: flyToDTC('pm' | 'mm' | 'mk')
+export function flyToDTC(key) { _flyToDTCBounds(key); }
 
 export function toggleDTCLayers(show) {
   if (!map) return;
