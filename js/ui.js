@@ -231,6 +231,11 @@ const SITE_GALLERIES = {
     'img/Maya_Kaan/Maya Kaan 1.webp',
     'img/Maya_Kaan/Maya Kaan 2.webp',
     'img/Maya_Kaan/Maya Kaan 3.webp'
+  ],
+  // --- DTC: Michoacán ---
+  'dtc-mich': [
+    'img/Mich/Micho_1.webp',
+    'img/Mich/Micho_2.webp'
   ]
 };
 

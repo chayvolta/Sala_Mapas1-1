@@ -12,6 +12,7 @@ let polygonsLayer = null;
 let trenMayaLineLayer = null;
 let trenMayaStationsLayer = null;
 let dtcLayerGroup = null;
+let michoacanLayerGroup = null;
 let baseLayerLight = null;
 let baseLayerSat = null;
 let currentBasemap = 'light';
@@ -80,6 +81,7 @@ export function initMap() {
   polygonsLayer = L.layerGroup().addTo(map);
   trenMayaLineLayer = L.layerGroup().addTo(map);
   dtcLayerGroup = L.layerGroup().addTo(map);
+  michoacanLayerGroup = L.layerGroup().addTo(map);
   
   trenMayaStationsLayer = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -120,7 +122,7 @@ export function getMap() { return map; }
 function _updateZoomLabels() {
   if (!map) return;
   const z = map.getZoom();
-  [..._dtcLabelMarkers, ..._tmLabelMarkers].forEach(({ marker, minZoom }) => {
+  [..._dtcLabelMarkers, ..._tmLabelMarkers, ..._michLabelMarkers].forEach(({ marker, minZoom }) => {
     const show = z >= (minZoom ?? LABEL_MIN_ZOOM);
     if (show) marker.openTooltip();
     else marker.closeTooltip();
@@ -446,27 +448,41 @@ const DTC_CONFIG = {
       'img/Maya_Kaan/Maya Kaan 2.webp',
       'img/Maya_Kaan/Maya Kaan 3.webp'
     ]
+  },
+  mich: {
+    color: '#a855f7',
+    label: 'Michoacán',
+    nameField: 'NOMGEO',
+    municipioField: null,
+    images: [
+      'img/Mich/Micho_1.webp',
+      'img/Mich/Micho_2.webp'
+    ]
   }
 };
 
 function buildDTCPopupHTML(feature, cfg) {
   const name = feature.properties[cfg.nameField] || 'Sin nombre';
   const mun  = cfg.municipioField ? (feature.properties[cfg.municipioField] || '') : '';
-  const [img1, img2, img3] = cfg.images;
+  const images = cfg.images;
+
+  const slidesHTML = images.map((img, i) =>
+    `<img class="dtc-slide${i === 0 ? ' active' : ''}" src="${encodeURI(img)}" alt="${cfg.label} - imagen ${i + 1}">`
+  ).join('\n        ');
+
+  const dotsHTML = images.map((_, i) =>
+    `<span class="dtc-dot${i === 0 ? ' active' : ''}"></span>`
+  ).join('\n        ');
 
   return `<div class="dtc-popup-card">
     <div class="dtc-carousel" id="dtcCar_${Math.random().toString(36).slice(2)}">
       <div class="dtc-slides">
-        <img class="dtc-slide active" src="${encodeURI(img1)}" alt="${cfg.label} - imagen 1">
-        <img class="dtc-slide" src="${encodeURI(img2)}" alt="${cfg.label} - imagen 2">
-        <img class="dtc-slide" src="${encodeURI(img3)}" alt="${cfg.label} - imagen 3">
+        ${slidesHTML}
       </div>
       <button class="dtc-nav dtc-nav-prev" aria-label="Anterior">&#8249;</button>
       <button class="dtc-nav dtc-nav-next" aria-label="Siguiente">&#8250;</button>
       <div class="dtc-dots">
-        <span class="dtc-dot active"></span>
-        <span class="dtc-dot"></span>
-        <span class="dtc-dot"></span>
+        ${dotsHTML}
       </div>
       <span class="spc-badge dtc-badge" style="background:${cfg.color};">${cfg.label}</span>
     </div>
@@ -593,6 +609,143 @@ function _flyToDTCBounds(key) {
 
 // API pública: flyToDTC('pm' | 'mm' | 'mk')
 export function flyToDTC(key) { _flyToDTCBounds(key); }
+
+// --- Michoacán Layer ---
+
+function _computeCentroid(feature) {
+  const name = feature.properties.NOMGEO;
+  
+  // Manual overrides for complex shapes where mathematical centroids fall outside
+  const MANUAL_CENTROIDS = {
+    'Uruapan': [19.4116, -102.0520] // Approximate coordinates of Uruapan city
+  };
+  
+  if (name && MANUAL_CENTROIDS[name]) {
+    return MANUAL_CENTROIDS[name];
+  }
+
+  // Bounding box center (more stable than naive vertex averaging)
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  function traverse(coords) {
+    if (typeof coords[0] === 'number') {
+      if (coords[0] < minX) minX = coords[0];
+      if (coords[0] > maxX) maxX = coords[0];
+      if (coords[1] < minY) minY = coords[1];
+      if (coords[1] > maxY) maxY = coords[1];
+    } else {
+      coords.forEach(traverse);
+    }
+  }
+  traverse(feature.geometry.coordinates);
+  return [(minY + maxY) / 2, (minX + maxX) / 2]; // [lat, lng]
+}
+
+const _michLabelMarkers = [];
+
+export function renderMichoacan(geojsonData) {
+  michoacanLayerGroup.clearLayers();
+  _michLabelMarkers.length = 0;
+  if (!geojsonData || !geojsonData.features) return;
+
+  const cfg = DTC_CONFIG.mich;
+  const bounds = L.latLngBounds([]);
+
+  // Render polygons
+  const polyLayer = L.geoJSON(geojsonData, {
+    style: { color: cfg.color, weight: 2, fillColor: cfg.color, fillOpacity: 0.25 },
+    onEachFeature: (feature, layer) => {
+      layer.on('click', () => _flyToDTCBounds('mich'));
+    }
+  });
+  polyLayer.addTo(michoacanLayerGroup);
+  try { bounds.extend(polyLayer.getBounds()); } catch(_) {}
+
+  // For each municipality, place a centroid marker with label + popup
+  geojsonData.features.forEach(feature => {
+    const name = feature.properties[cfg.nameField] || 'Sin nombre';
+    const centroid = _computeCentroid(feature);
+    const latlng = L.latLng(centroid[0], centroid[1]);
+
+    const marker = L.circleMarker(latlng, {
+      radius: 6,
+      fillColor: cfg.color,
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.9
+    });
+
+    // Tooltip (zoom-controlled label)
+    if (name) {
+      marker.bindTooltip(name, {
+        permanent: true,
+        direction: 'top',
+        offset: [0, -8],
+        className: 'dtc-label dtc-label--mich'
+      });
+      _registerZoomLabel(marker, LABEL_MIN_ZOOM, false);
+      _michLabelMarkers.push({ marker, minZoom: LABEL_MIN_ZOOM });
+    }
+
+    // Popup card with carousel
+    const popupHTML = buildDTCPopupHTML(feature, cfg);
+    marker.bindPopup(popupHTML, {
+      className: 'fonatur-station-popup dtc-station-popup',
+      maxWidth: 300,
+      minWidth: 260
+    });
+
+    marker.on('click', () => _flyToDTCBounds('mich'));
+
+    // Carousel + "Ver detalles" button in popup
+    marker.on('popupopen', (e) => {
+      const el = e.popup.getElement();
+      if (!el) return;
+      const slides = el.querySelectorAll('.dtc-slide');
+      const dots   = el.querySelectorAll('.dtc-dot');
+      const prev   = el.querySelector('.dtc-nav-prev');
+      const next   = el.querySelector('.dtc-nav-next');
+      const detBtn = el.querySelector('.dtc-details-btn');
+      let current  = 0;
+
+      const goTo = (idx) => {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (idx + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+      };
+
+      prev?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current - 1); });
+      next?.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(current + 1); });
+      dots.forEach((dot, i) => dot.addEventListener('click', (ev) => { ev.stopPropagation(); goTo(i); }));
+
+      if (detBtn) {
+        detBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          _onDTCDetailsClickCb?.({ key: 'mich', name, cfg });
+        }, { once: true });
+      }
+    });
+
+    marker.addTo(michoacanLayerGroup);
+    bounds.extend(latlng);
+  });
+
+  if (bounds.isValid()) dtcLayerBounds.set('mich', bounds);
+
+  // Apply initial label visibility
+  setTimeout(_updateZoomLabels, 0);
+}
+
+export function toggleMichoacanLayers(show) {
+  if (!map) return;
+  if (show) {
+    if (!map.hasLayer(michoacanLayerGroup)) map.addLayer(michoacanLayerGroup);
+  } else {
+    if (map.hasLayer(michoacanLayerGroup)) map.removeLayer(michoacanLayerGroup);
+  }
+}
 
 export function toggleDTCLayers(show) {
   if (!map) return;

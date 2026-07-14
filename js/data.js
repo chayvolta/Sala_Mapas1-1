@@ -82,3 +82,14 @@ export async function loadDTCData() {
     return null;
   }
 }
+
+/** Carga de datos de Michoacán (municipios) */
+export async function loadMichoacanData() {
+  try {
+    const res = await fetch(`${BASE}/polygons/Plan_Michacan.geojson`);
+    return res.ok ? await res.json() : null;
+  } catch (err) {
+    console.error('Error cargando Michoacán:', err);
+    return null;
+  }
+}

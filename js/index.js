@@ -2,17 +2,18 @@
  * index.js — Bootstrap: carga datos → inicia mapa → conecta UI
  */
 import { AppState } from './state.js';
-import { loadSites, loadTrenMayaData, loadDTCData } from './data.js';
+import { loadSites, loadTrenMayaData, loadDTCData, loadMichoacanData } from './data.js';
 import * as MapModule from './map.js';
 import * as UI from './ui.js';
 
 async function boot() {
   try {
     // 1) Cargar datos
-    const [sites, trenData, dtcData] = await Promise.all([
+    const [sites, trenData, dtcData, michData] = await Promise.all([
       loadSites(),
       loadTrenMayaData(),
-      loadDTCData()
+      loadDTCData(),
+      loadMichoacanData()
     ]);
     AppState.set({ sites });
 
@@ -22,6 +23,8 @@ async function boot() {
     MapModule.toggleTrenMayaLayers(AppState.get('year') >= 2024);
     MapModule.renderDTC(dtcData);
     MapModule.toggleDTCLayers(AppState.get('year') >= 2026 && (AppState.get('filter') === 'all' || AppState.get('filter') === 'dtc'));
+    MapModule.renderMichoacan(michData);
+    MapModule.toggleMichoacanLayers(AppState.get('year') >= 2026 && (AppState.get('filter') === 'all' || AppState.get('filter') === 'dtc'));
     // Asegurar que Leaflet mide el contenedor correctamente tras el layout flex-column
     setTimeout(() => MapModule.getMap()?.invalidateSize(), 100);
 
@@ -58,6 +61,7 @@ async function boot() {
       // Control de visibilidad del Tren Maya por año
       MapModule.toggleTrenMayaLayers(state.year >= 2024);
       MapModule.toggleDTCLayers(state.year >= 2026 && (state.filter === 'all' || state.filter === 'dtc'));
+      MapModule.toggleMichoacanLayers(state.year >= 2026 && (state.filter === 'all' || state.filter === 'dtc'));
     });
 
     console.log(`✅ Geoportal FONATUR cargado — ${sites.length} desarrollos`);
