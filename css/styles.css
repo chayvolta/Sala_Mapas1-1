@@ -735,102 +735,161 @@ img {
 
 /* Gallery special modal — full image, no chrome */
 .modal--gallery {
-  max-width: 900px;
   background: transparent;
   box-shadow: none;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.modal--gallery .modal-head {
-  display: none;
-}
-.modal--gallery .modal-carousel {
-  height: 80vh;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.modal--gallery .modal-carousel img {
-  object-fit: contain;
-  background: #111;
-  border-radius: 12px;
-}
-/* Close button floats inside carousel */
-.modal--gallery .gallery-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 20;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: 22px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  border-radius: 0;
+  overflow: visible;
+  max-width: none;
+  width: auto;
+  max-height: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s;
-  backdrop-filter: blur(4px);
 }
-.modal--gallery .gallery-close-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
+.modal--gallery .modal-head { display: none; }
+.modal--gallery .modal-body { display: none; }
+.modal--gallery .carousel-dots { display: none; }
+
+/* Gallery carousel: just the image, no fixed size */
+.modal--gallery .modal-carousel {
+  position: static;
+  height: auto;
+  background: transparent;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-/* Dots inside carousel */
-.modal--gallery .carousel-dots {
+.modal--gallery .modal-carousel img {
+  width: auto;
+  height: auto;
+  max-width: min(90vw, 880px);
+  max-height: 80vh;
+  position: static;
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  opacity: 0;
   display: none;
+  transition: opacity 0.25s ease;
 }
-.modal--gallery .gallery-dots-overlay {
+.modal--gallery .modal-carousel img.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ===== Gallery overlay controls ===== */
+/* Container spans the full overlay via position:fixed */
+.gal-controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* pass clicks through to overlay close */
+  z-index: 2010;
+}
+
+/* All individual buttons restore pointer events */
+.gal-btn {
   position: absolute;
-  bottom: 16px;
+  pointer-events: all;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  backdrop-filter: blur(6px);
+}
+.gal-btn:hover {
+  background: rgba(0,0,0,0.82);
+  transform: scale(1.08);
+}
+
+/* Close — top right */
+.gal-close {
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+}
+
+/* Ampliar — top right, below close */
+.gal-expand {
+  top: 70px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  font-size: 19px;
+}
+
+/* Prev arrow — left center */
+.gal-prev {
+  top: 50%;
+  left: 18px;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  font-size: 30px;
+  border-radius: 50%;
+}
+.gal-prev:hover { transform: translateY(-50%) scale(1.08); }
+
+/* Next arrow — right center */
+.gal-next {
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  font-size: 30px;
+  border-radius: 50%;
+}
+.gal-next:hover { transform: translateY(-50%) scale(1.08); }
+
+/* Counter — top left */
+.gal-counter {
+  position: absolute;
+  pointer-events: none;
+  top: 20px;
+  left: 20px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Dots — bottom center */
+.gal-dots {
+  position: absolute;
+  pointer-events: all;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
-  z-index: 20;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 6px 14px;
-  border-radius: 20px;
+  gap: 9px;
+  background: rgba(0,0,0,0.45);
+  padding: 7px 16px;
+  border-radius: 24px;
   backdrop-filter: blur(4px);
 }
-.modal--gallery .gallery-dots-overlay .dot {
+.gal-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255,255,255,0.4);
   cursor: pointer;
   transition: all 0.2s var(--ease);
   border: none;
 }
-.modal--gallery .gallery-dots-overlay .dot.active {
+.gal-dot.active {
   background: #fff;
   transform: scale(1.3);
-}
-/* Nav arrows bigger */
-.modal--gallery .carousel-nav {
-  width: 44px;
-  height: 44px;
-  font-size: 24px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-.modal--gallery .carousel-nav:hover {
-  background: rgba(0, 0, 0, 0.75);
-}
-/* Counter overlay */
-.modal--gallery .gallery-counter {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 12px;
-  z-index: 20;
-  backdrop-filter: blur(4px);
 }
 
 /* Leaflet overrides */

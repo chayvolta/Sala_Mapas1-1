@@ -254,25 +254,36 @@ export function showModal(site) {
   if (galleryImgs) {
     modal.classList.add('modal--gallery');
     const imgs = galleryImgs;
-    carousel.innerHTML = `
-      <button class="gallery-close-btn" id="galClose" aria-label="Cerrar">×</button>
-      <span class="gallery-counter" id="galCounter">1 / ${imgs.length}</span>
-      <button class="carousel-nav prev" id="cPrev">‹</button>
-      ${imgs.map((src, i) =>
-        `<img src="${encodeURI(src)}" alt="${site.name} – ${i + 1}" class="${i === 0 ? 'active' : ''}">`
-      ).join('')}
-      <button class="carousel-nav next" id="cNext">›</button>
-      <div class="gallery-dots-overlay">
-        ${imgs.map((_, i) =>
-          `<span class="dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`
-        ).join('')}
-      </div>`;
+
+    // The image lives inside the carousel; all controls attach to the overlay
+    carousel.innerHTML = imgs.map((src, i) =>
+      `<img src="${encodeURI(src)}" alt="${site.name} – ${i + 1}" class="${i === 0 ? 'active' : ''}">`
+    ).join('');
     dots.innerHTML = '';
     body.innerHTML = '';
 
-    // Carousel bindings con counter
+    // Inject overlay-level controls into the overlay element (not the modal)
+    let ctrlsEl = document.getElementById('galControls');
+    if (ctrlsEl) ctrlsEl.remove();
+    ctrlsEl = document.createElement('div');
+    ctrlsEl.id = 'galControls';
+    ctrlsEl.className = 'gal-controls';
+    ctrlsEl.innerHTML = `
+      <button class="gal-btn gal-close" id="galClose" aria-label="Cerrar">×</button>
+      <button class="gal-btn gal-expand" id="galExpand" aria-label="Ampliar">⛶</button>
+      <span class="gal-counter" id="galCounter">1 / ${imgs.length}</span>
+      <button class="gal-btn gal-prev" id="cPrev" aria-label="Anterior">‹</button>
+      <button class="gal-btn gal-next" id="cNext" aria-label="Siguiente">›</button>
+      <div class="gal-dots" id="galDots">
+        ${imgs.map((_, i) =>
+          `<span class="gal-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`
+        ).join('')}
+      </div>`;
+    overlay.appendChild(ctrlsEl);
+
+    // Carousel bindings
     const cImgs = carousel.querySelectorAll('img');
-    const cDots = carousel.querySelectorAll('.gallery-dots-overlay .dot');
+    const cDots = ctrlsEl.querySelectorAll('.gal-dot');
     const cCounter = document.getElementById('galCounter');
     const goTo = (i) => {
       cImgs[_carouselIdx]?.classList.remove('active');
@@ -280,12 +291,30 @@ export function showModal(site) {
       _carouselIdx = ((i % imgs.length) + imgs.length) % imgs.length;
       cImgs[_carouselIdx]?.classList.add('active');
       cDots[_carouselIdx]?.classList.add('active');
-      cCounter.textContent = `${_carouselIdx + 1} / ${imgs.length}`;
+      if (cCounter) cCounter.textContent = `${_carouselIdx + 1} / ${imgs.length}`;
     };
+
     document.getElementById('cPrev')?.addEventListener('click', () => goTo(_carouselIdx - 1));
     document.getElementById('cNext')?.addEventListener('click', () => goTo(_carouselIdx + 1));
     cDots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.i)));
-    document.getElementById('galClose')?.addEventListener('click', () => overlay.classList.remove('active'));
+
+    const closeGallery = () => {
+      overlay.classList.remove('active');
+      ctrlsEl.remove();
+    };
+    document.getElementById('galClose')?.addEventListener('click', closeGallery);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeGallery(); }, { once: true });
+
+    // Fullscreen / ampliar
+    document.getElementById('galExpand')?.addEventListener('click', () => {
+      const activeImg = carousel.querySelector('img.active');
+      if (!activeImg) return;
+      if (!document.fullscreenElement) {
+        overlay.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
 
     overlay.classList.add('active');
     return;
